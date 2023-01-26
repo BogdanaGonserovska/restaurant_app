@@ -11,10 +11,22 @@ class UserSerializer(serializers.ModelSerializer):
 class MenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menu
-        fields = ('id', 'meal', 'picture', 'price', 'description')
+        fields = ('id', 'name', 'user_id')
+
+
+class DishSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dish
+        fields = ('id', 'meal', 'picture', 'price', 'description', 'menu_id')
+
+
+class DishForOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DishForOrder
+        fields = ('id', 'menu_id', 'count')
 
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ('id', 'date', 'menu_id', 'user_id')
+        fields = ('id', 'date', 'menu_id', 'user_id', 'restaurant_id', 'table_number')
