@@ -220,3 +220,65 @@ def dish_view_id(request, id):
             return Response({'message': 'dish not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
+@api_view(['POST', 'GET'])
+def order_view(request):
+    if request.method == 'POST':
+        date = datetime.now()
+        user_id = request.user if not isinstance(request.user, AnonymousUser) else None
+        restaurant_id = request.data['restaurant_id']
+        table = request.data['table']
+
+        try:
+            restaurant = User.objects.get(id=restaurant_id)
+            if not restaurant.is_restaurant:
+                return Response({'message': 'not restaurant'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'message': f'{e}'}, status=status.HTTP_404_NOT_FOUND)
+       
+        order = Order(date=date, user_id=user_id, restaurant_id=restaurant, table_number=table)
+        serializer = OrderSerializer(data=model_to_dict(order))
+        if not serializer.is_valid():
+            return Response({'message': 'invalid values'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        order.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    if request.method == 'GET':
+        user = request.user
+        if isinstance(user, AnonymousUser):
+            return Response({'message': 'no token available'})
+        if user.is_restaurant:
+            order = Order.objects.filter(restaurant_id=user)
+        else:
+            order = Order.objects.filter(user_id=user)
+        serializer = OrderSerializer(order, many=True)
+        order_data = serializer.data
+        for o in order_data:
+            dish = DishForOrder.objects.filter(order_id=o['id'])
+            dish_serializer = DishForOrderSerializer(dish, many=True)
+            o['dish_id']=dish_serializer.data
+        return Response(order_data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def order_dish(request):
+    if request.method == 'POST':
+        dish_id = request.data['dish_id']
+        order_id = request.data['order_id']
+        count = request.data['count']
+
+        try:
+            dish = Dish.objects.get(id=dish_id)
+            order = Order.objects.get(id=order_id)
+        except Exception as e:
+            return Response({'message': f'{e}'}, status=status.HTTP_404_NOT_FOUND)
+        
+        order_dish = DishForOrder(order_id=order, count=count, dish_id=dish)
+        serializer = DishForOrderSerializer(data=model_to_dict(order_dish))
+
+        if not serializer.is_valid():
+            return Response({'message': 'invalid values'}, status=status.HTTP_400_BAD_REQUEST)
+
+        order_dish.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+

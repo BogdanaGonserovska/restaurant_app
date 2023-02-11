@@ -28,15 +28,14 @@ class Dish(models.Model):
     menu_id = models.ForeignKey(Menu, on_delete=models.CASCADE)
 
 
+class Order(models.Model):
+    date = models.DateTimeField(default=datetime.now)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user', null=True)
+    restaurant_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='restaurant')
+    table_number = models.IntegerField(default=1)
+
+    
 class DishForOrder(models.Model):
     dish_id = models.ForeignKey(Dish, on_delete=models.CASCADE)
     count = models.IntegerField(default=1)
-
-
-class Order(models.Model):
-    date = models.DateTimeField(default=datetime.now)
-    dish_id = models.ForeignKey(DishForOrder, on_delete=models.CASCADE, default=None)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user', null=True)
-    restaurant_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='restaurant', default=None)
-    table_number = models.IntegerField(default=1)
-    
+    order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
