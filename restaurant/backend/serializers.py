@@ -23,10 +23,10 @@ class DishSerializer(serializers.ModelSerializer):
 class DishForOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = DishForOrder
-        fields = ('id', 'menu_id', 'count')
+        fields = ('id', 'dish_id', 'count', 'order_id')
 
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ('id', 'date', 'menu_id', 'user_id', 'restaurant_id', 'table_number')
+        fields = ('id', 'date', 'user_id', 'restaurant_id', 'table_number')
